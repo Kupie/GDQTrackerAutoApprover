@@ -2,7 +2,7 @@
 trackerUser = "TRACKERUSERNAME"
 trackerPassword = "TRACKERPASSWORD"
 
-#How many seconds in between checking donation totals. Don't crank this number too low, bullying servers is rude
+#How many seconds in between checking for donations. Don't crank this number too low, bullying servers is rude
 autoSendRate = 15
 
 #Event ID in tracker (Go to "edit event" and look at the URL, number between 'event' and 'change'; MWSF2021 is "3" for example: https://tracker.2dcon.net/admin/tracker/event/3/change/
