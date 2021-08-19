@@ -71,7 +71,6 @@ try:
     elem = Select(driver.find_element_by_id("id_event"))
 except:
     print ('Not able to load event page. Please check login information.')
-    print ('Exiting in 10 seconds...')
     sys.exit(1)
 
 try:
