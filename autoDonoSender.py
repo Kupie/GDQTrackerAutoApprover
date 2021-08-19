@@ -1,6 +1,6 @@
 #Tracker Login Info
-trackerUser = "TRACKERUSERNAME"
-trackerPassword = "TRACKERPASSWORD"
+trackerUser = "GDQTRACKERUSER"
+trackerPassword = "GDQTRACKERPASSWORD"
 
 #How many seconds in between checking for donations. Don't crank this number too low, bullying servers is rude
 autoSendRate = 15
@@ -8,14 +8,20 @@ autoSendRate = 15
 #Event ID in tracker (Go to "edit event" and look at the URL, number between 'event' and 'change'; MWSF2021 is "3" for example: https://tracker.2dcon.net/admin/tracker/event/3/change/
 EventID = 3
 
+#Set to True to log everything to console window instead of just showing current status
+Logging = False
 
+#------------END CONFIGURATION AREA--------------
 
 import sys
 if sys.version_info < (3, 0):
 	sys.stdout.write("Sorry, requires Python 3.x, not Python 2.x\n")
 	sys.exit(1)
 
+import time
+from datetime import datetime
 import os
+
 
 #Makes a universal cls function to clear screen. Thanks popcnt: https://stackoverflow.com/a/684344
 def cls():
@@ -25,10 +31,7 @@ def cls():
 import ctypes
 ctypes.windll.kernel32.SetConsoleTitleW("Donations Auto-approver")
 
-#THEY SET US UP THE IMPORTS
-import time
-from datetime import datetime
-
+#Selenium time awwyee remote controlling browsers like we're magic
 try:
     from selenium import webdriver
     from selenium.webdriver.common.keys import Keys
@@ -38,10 +41,16 @@ except ImportError:
     print ('Note that you will also need Google Chrome installed, along with "chromedriver" executable in your path')
     sys.exit(1)
 
+
 #We use Chrome since it has a headless option
-options = webdriver.ChromeOptions();
-options.add_argument('headless');
-options.add_argument('window-size=800x600'); # optional
+options = webdriver.ChromeOptions()
+#Awwyiss no stupid browser window going
+options.add_argument('headless')
+#optional, may use less resources to have a small window?
+options.add_argument('window-size=800x600')
+#Shut up Chrome we don't need your stupid "devtools blahblah" message
+options.add_experimental_option('excludeSwitches', ['enable-logging'])
+#We finally start the web driver
 driver = webdriver.Chrome(options=options)
 
 #Go to the select event page, and try to login
@@ -62,6 +71,7 @@ try:
     elem = Select(driver.find_element_by_id("id_event"))
 except:
     print ('Not able to load event page. Please check login information.')
+    print ('Exiting in 10 seconds...')
     sys.exit(1)
 
 try:
@@ -79,8 +89,9 @@ cls()
 while True:
     #Tracker needs time to get donations
     time.sleep(1)
-#uncomment this if you just want current status instead of history/logging
-#cls()
+    if (Logging == False):
+        cls()
+
     autoSendDonoRate=autoSendRate
     try:
         elem = driver.find_elements_by_xpath('//button[normalize-space()="Send to Reader"]')
