@@ -60,14 +60,13 @@ url1 = 'https://tracker.2dcon.net/tracker/event/' + str(EventID1)
 url2 = 'https://tracker.2dcon.net/tracker/event/' + str(EventID2)
 
 cls()
-print (url1)
-print (url2)
 
 #They have set us up the loop
 
 while True:
     if (not Logging):
         cls()
+
     try:
         #Make the request to tracker, plus the "goals" and "bidwars" page
         page1 = requests.get(url1, verify=False)
@@ -99,6 +98,8 @@ while True:
         if (spanint2s3 > int(DonoTotal2)):
             DonoTotal2 = spanint2s3
             DonoTotal2 = str(int(DonoTotal2) )
+        print (url1 + ' -- $' + DonoTotal1)
+        print (url2 + ' -- $' + DonoTotal2)
 
         #We got two strings... time to add them together as numbers
         DonoTotalCombined = int(DonoTotal1) + int(DonoTotal2)
