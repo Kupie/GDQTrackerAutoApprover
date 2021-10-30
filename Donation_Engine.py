@@ -39,10 +39,13 @@ import os
 def cls():
     os.system('cls' if os.name=='nt' else 'clear')
 
-#Set Window Title
-import ctypes
-ctypes.windll.kernel32.SetConsoleTitleW("Donations Engine")
-
+#Set Window Title. I stuck this under a "try" command because this would fail on Linux systems due to no ctypes/window stuffs
+#Although trying to run this on Linux would likely fail since we use a headless chrome browser window to approve donos...
+try:
+    import ctypes
+    ctypes.windll.kernel32.SetConsoleTitleW("Donations Engine")
+except:
+    pass
 
 #Oh boy parallel threads time to get into some fucky shit
 import threading
