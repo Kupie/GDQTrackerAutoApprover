@@ -275,7 +275,9 @@ def donoTotalsUpdateFunc():
             spantext1 = span.text.split('(')
     
             spantext2 = spantext1[-2].split('$')[-1]
-            spanint = int(spantext2.split(".")[0])
+            #Fix for when there's commas
+            spantext3 = spantext2.replace(',', '')
+            spanint = int(spantext3.split(".")[0])
         
         
             if (spanint > int(DonoTotal)):
