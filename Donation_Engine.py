@@ -6,6 +6,12 @@ updateTotals = True
 #Should we automatically approve donations to send to the host? True/False only
 autoApprove = True
 
+#Force through donations with "Flagged" transaction state?
+approveFlaggedDonos = True
+
+#Force through donations with "Pending" transaction state?
+approvePendingDonos = False
+
 #Tracker Login Info
 trackerUser = "TRACKERUSERNAME"
 trackerPassword = "TRACKERPASSWORD"
@@ -17,10 +23,10 @@ donoRefreshRate = 15
 autoSendRate = 10
 
 #Event ID in tracker (Go to "edit event" and look at the URL, number between 'event' and 'change'; MWSF2021 is "3" for example: https://tracker.2dcon.net/admin/tracker/event/3/change/
-EventID = 3
+EventID = 7
 
 #Set to True to log everything to console window instead of just showing current status
-Logging = False
+Logging = True
 
 
 
@@ -63,6 +69,7 @@ except ImportError:
         
 
 def main():
+    browserKill()
     global killApp
     killApp = False
 
@@ -177,11 +184,10 @@ def autoSendToReader():
     
     driver.get("https://tracker.2dcon.net/admin/tracker/donation/process_donations")
     sleepyKillCheck(0)
-    cls()
     
     while not killApp:
         #Tracker needs time to get donations
-
+        driver.get("https://tracker.2dcon.net/admin/tracker/donation/process_donations")
         sleepyKillCheck(1)
 
         if (Logging == False):
@@ -196,18 +202,45 @@ def autoSendToReader():
     
             elem = driver.find_element_by_xpath('//button[normalize-space()="Send to Reader"]')
             elem.click()
-            print('----Sent Donation to reader')
+            print(datetime.now().strftime("%I:%M:%S %p") +': Sent Donation to reader')
         except:
-            print('----Could not find any donations to send to reader, probably none')
+            print(datetime.now().strftime("%I:%M:%S %p") +': Could not find any donations to send to reader, probably none')
             pass
-        print ('----Last Run at ' + datetime.now().strftime("%I:%M:%S %p") + ', Waiting ' + str(autoSendDonoRate) + ' seconds to run again...')
-        print ('--------------------------------------------------')
 
-        sleepyKillCheck(autoSendDonoRate)
+        sleepyKillCheck(0)
         #Click Refresh Button
         elem = driver.find_element_by_xpath('//button[normalize-space()="Refresh"]')
         elem.click()
-        
+        #here goes hacky shit while I'm drunk wooo
+        #this should force donos through
+        if (approveFlaggedDonos):
+            try:
+                driver.get("https://tracker.2dcon.net/admin/tracker/donation/?event__id__exact=" + str(EventID) + "&transactionstate__exact=FLAGGED")
+                sleepyKillCheck(1)
+                elem = Select(driver.find_element_by_id("id_form-0-transactionstate"))
+                elem.select_by_value('COMPLETED')
+                driver.find_element_by_xpath("/html/body/div/div[3]/div/div/form/p/input").click()
+                sleepyKillCheck(1)
+                print(datetime.now().strftime("%I:%M:%S %p") +": Forced a flagged dono through")
+            except Exception as e:
+                print(datetime.now().strftime("%I:%M:%S %p") +': Could not find any flagged donos to force through, continuing')
+                pass
+        if (approvePendingDonos):
+            try:
+                driver.get("https://tracker.2dcon.net/admin/tracker/donation/?event__id__exact=" + str(EventID) + "&transactionstate__exact=PENDING")
+                sleepyKillCheck(1)
+                elem = Select(driver.find_element_by_id("id_form-0-transactionstate"))
+                
+                elem.select_by_value('COMPLETED')
+                driver.find_element_by_xpath("/html/body/div/div[3]/div/div/form/p/input").click()
+                sleepyKillCheck(1)
+                print(datetime.now().strftime("%I:%M:%S %p") +': Forced a pending dono through, waiting ' + str(autoSendDonoRate) + ' seconds to run again...')
+            except Exception as e:
+                print(datetime.now().strftime("%I:%M:%S %p") +': Could not find any pending donos to force through, waiting ' + str(autoSendDonoRate) + ' seconds to run again...')
+                #print(str(e))
+                pass
+
+        sleepyKillCheck(autoSendRate - 4)
 #-------End main loop for browser, next part only runs if keyboardinterrupt happened during a non-sleep command------
     #print('Kill Received, exiting Selenium thread....')
     browserKill()
@@ -275,7 +308,6 @@ def donoTotalsUpdateFunc():
             spantext1 = span.text.split('(')
     
             spantext2 = spantext1[-2].split('$')[-1]
-            #Fix for when there's commas
             spantext3 = spantext2.replace(',', '')
             spanint = int(spantext3.split(".")[0])
         
@@ -297,8 +329,10 @@ def donoTotalsUpdateFunc():
                 TotalValue = "   $" + DonoTotal
             elif len(DonoTotal) == 4:
                 TotalValue = "  $" + DonoTotal
-            else:
+            elif len(DonoTotal) == 5:
                 TotalValue = " $" + DonoTotal
+            else:
+                TotalValue = "$" + DonoTotal
             TotalRaisedText = "Total Raised: $" + DonoTotal
             text_file = open("Totals.txt", "w")
             
@@ -309,13 +343,12 @@ def donoTotalsUpdateFunc():
             text_file.close()
             
             #Doesn't even flash since it's all one "print" command ran immediately
-            print(TotalRaisedText + '\n-Last Run at ' + datetime.now().strftime("%I:%M:%S %p") + ', Waiting ' + str(donoRefreshRate) + ' seconds to run again...')
+            print(datetime.now().strftime("%I:%M:%S %p") +': ' + TotalRaisedText)
         
         
         except:
             print('Could not fetch donation total. Donation Server Down?...')
             
-        print ('--------------------------------------------------')
         #Wait "donoRefreshRate" amount of seconds before running again
         sleepyKillCheck(donoRefreshRate)
         
