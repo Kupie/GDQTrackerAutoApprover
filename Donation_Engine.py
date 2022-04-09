@@ -348,6 +348,7 @@ def donoTotalsUpdateFunc():
         
         except:
             print('Could not fetch donation total. Donation Server Down?...')
+            continue
             
         #Wait "donoRefreshRate" amount of seconds before running again
         sleepyKillCheck(donoRefreshRate)
