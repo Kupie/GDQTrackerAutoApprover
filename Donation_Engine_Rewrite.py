@@ -2,8 +2,8 @@
 
 
 #Tracker Login Info
-trackerUser = "SpeedyFestVolunteer"
-trackerPassword = "DoNotLeakThisPW"
+trackerUser = "USERNAME_HERE"
+trackerPassword = "PASSWORD_HERE"
 
 #How many seconds in between updates. Don't crank this number too low, bullying servers is rude
 donoRefreshRate = 15
