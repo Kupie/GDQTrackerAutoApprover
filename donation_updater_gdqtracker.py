@@ -4,7 +4,7 @@ EventID = 16
 
 #Should we buffer the number with spaces, so a left-justified text is "centered" anyway in OBS? 
 #True/False only. Should be False if you are centering the text in OBS
-CenterText = True
+CenterText = False
 
 #How many seconds in between updates. Don't crank this number too low, bullying servers is rude
 donoRefreshRate = 15
@@ -98,8 +98,8 @@ while True:
                 TotalValue = "  $" + DonoTotal
             else:
                 TotalValue = " $" + DonoTotal
-            else:
-                TotalValue = "$" + DonoTotal
+        else:
+            TotalValue = "$" + DonoTotal
                 
         TotalRaisedText = "Total Raised: $" + DonoTotal
         text_file = open("Totals.txt", "w")
