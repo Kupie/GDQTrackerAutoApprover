@@ -1,7 +1,10 @@
 #Change this URL to the URL of the donation page:
 
-EventID = 3
+EventID = 16
 
+#Should we buffer the number with spaces, so a left-justified text is "centered" anyway in OBS? 
+#True/False only. Should be False if you are centering the text in OBS
+CenterText = True
 
 #How many seconds in between updates. Don't crank this number too low, bullying servers is rude
 donoRefreshRate = 15
@@ -30,12 +33,18 @@ from datetime import datetime
 import os
 import requests
 import time
-import ctypes
+try:
+    import ctypes
+except:
+    pass
+
 import urllib3
 
 #sets nice title
-ctypes.windll.kernel32.SetConsoleTitleW("Donations Updater")
-
+try:
+    ctypes.windll.kernel32.SetConsoleTitleW("Donations Updater")
+except:
+    pass
 #disable SSL warnings. SRC requires HTTPS but sometimes their certificate isn't "proper", this makes it connect
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -54,8 +63,9 @@ while True:
         #Make the request to tracker, plus the "goals" and "bidwars" page
         page = requests.get(url, verify=False)
     except:
-        #If it fails, URL is invalid... or SRC is down. That's always an option
-        print ("Invalid URL connection to tracker failed. Open this python script and check that 2nd line! Exiting...")
+        #If it fails, URL is invalid... or tracker is down. That's always an option
+        print ("Invalid URL connection to tracker failed. Open this python script and check that 2nd line! Exiting in 10 seconds...")
+        time.sleep(10)
         sys.exit(1)
         
     soup = BeautifulSoup(page.content,'html.parser')
@@ -77,16 +87,20 @@ while True:
         
 #        Used for testing different number values
 #        DonoTotal = '2000'
-        if len(DonoTotal) == 1:
-            TotalValue = "     $" + DonoTotal
-        elif len(DonoTotal) == 2:
-            TotalValue = "    $" + DonoTotal
-        elif len(DonoTotal) == 3:
-            TotalValue = "   $" + DonoTotal
-        elif len(DonoTotal) == 4:
-            TotalValue = "  $" + DonoTotal
-        else:
-            TotalValue = " $" + DonoTotal
+        if CenterText:
+            if len(DonoTotal) == 1:
+                TotalValue = "     $" + DonoTotal
+            elif len(DonoTotal) == 2:
+                TotalValue = "    $" + DonoTotal
+            elif len(DonoTotal) == 3:
+                TotalValue = "   $" + DonoTotal
+            elif len(DonoTotal) == 4:
+                TotalValue = "  $" + DonoTotal
+            else:
+                TotalValue = " $" + DonoTotal
+            else:
+                TotalValue = "$" + DonoTotal
+                
         TotalRaisedText = "Total Raised: $" + DonoTotal
         text_file = open("Totals.txt", "w")
         
